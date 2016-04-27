@@ -48,12 +48,9 @@ function :hijack:apply() {
 }
 
 function :hijack:hook() {
-    BUFFER=${BUFFER//\\/\\\\}
-
-    print -S "$BUFFER"
+    print -S "${BUFFER//\\/\\\\}"
 
     BUFFER="$(:hijack:foreach-pipe "$BUFFER")"
-    BUFFER=${BUFFER//\\\\/\\}
 }
 
 function :hijack:foreach-pipe() {

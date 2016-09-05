@@ -8,7 +8,7 @@ hijack:transform() {
     local transformation=$2
 
     if [ -z "$is_expression" -a "$transformation" ]; then
-        condition="grep -Eq ${(q)condition}"
+        condition="?${condition}"
     fi
 
     _hijack_transformations+=("$condition" "$transformation")
@@ -27,23 +27,34 @@ hijack:reset() {
     local new_buffer
     local result=1
 
+    local MATCH MBEGIN MEND
+    local match mbegin mend
+
     for (( i = 1; i < ${#_hijack_transformations}; i += 2 )); do
         condition=${_hijack_transformations[$i]}
         transformation=${_hijack_transformations[$i + 1]}
 
-        if condition_result=$(eval $condition <<< $buffer); then
-            if [ ! "$transformation" ]; then
-                if [ "$condition_result" != "$buffer" ]; then
-                    result=0
-                fi
+        if [[ "${condition[1]}" == "?" ]]; then
+            if [[ ! "$buffer" =~ "${condition:2}" ]]; then
+                continue
+            fi
+        else
+            if ! condition_result=$(builtin eval $condition <<< $buffer); then
+                continue
+            fi
+        fi
 
-                buffer=$condition_result
-            else
-                if new_buffer=$(eval $transformation <<< $buffer); then
-                    result=0
+        if [ ! "$transformation" ]; then
+            if [ "$condition_result" != "$buffer" ]; then
+                result=0
+            fi
 
-                    buffer=$new_buffer
-                fi
+            buffer=$condition_result
+        else
+            if new_buffer=$(builtin eval $transformation <<< $buffer); then
+                result=0
+
+                buffer=$new_buffer
             fi
         fi
     done

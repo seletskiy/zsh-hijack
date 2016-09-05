@@ -35,7 +35,7 @@ hijack:reset() {
         transformation=${_hijack_transformations[$i + 1]}
 
         if [[ "${condition[1]}" == "?" ]]; then
-            if [[ ! "$buffer" =~ "${condition:2}" ]]; then
+            if [[ ! "$buffer" =~ "${condition:1}" ]]; then
                 continue
             fi
         else

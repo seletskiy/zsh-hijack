@@ -1,3 +1,5 @@
+zstyle 'hijack:highlighting' 'fg=4'
+
 _hijack_skip_history_first=false
 _hijack_transformations=()
 
@@ -64,8 +66,6 @@ hijack:reset() {
     return "$result"
 }
 
-zle -N zle-line-finish :hijack:hook
-
 :hijack:hook() {
     print -S "${BUFFER//\\/\\\\}"
 
@@ -115,4 +115,26 @@ _zsh_highlight_hijack_highlighter() {
     fi
 }
 
-zstyle 'hijack:highlighting' 'fg=4'
+:hijack:bind-widget() {
+    local widget="$1"
+    local func="$2"
+    shift 2
+
+    local origin
+
+    origin="$(zle -lL $widget | cut -f4- -d' ')"
+
+    eval "::hijack:widget:$widget:$func() {
+        $func ${@} \"$id\" \"\$@\"
+
+        if [[ \"$origin\" ]]; then
+            zle \"$origin\" -- \"\$@i\"
+        fi
+    }"
+
+    zle -N "::hijack:widget:$widget:$func"
+    zle -N "$widget" "::hijack:widget:$widget:$func"
+}
+
+:hijack:bind-widget zle-line-finish :hijack:hook
+

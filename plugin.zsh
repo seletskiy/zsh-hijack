@@ -116,25 +116,35 @@ _zsh_highlight_hijack_highlighter() {
 }
 
 :hijack:bind-widget() {
-    local widget="$1"
-    local func="$2"
-    shift 2
+    local id="$1"
+    local widget="$2"
+    local func="$3"
+    shift 3
 
-    local origin
+    local name="::hijack:widget:$id:$widget:$func"
 
-    origin="$(zle -lL $widget | cut -f4- -d' ')"
+    if [[ "${widgets[$name]}" ]]; then
+        return
+    fi
 
-    eval "::hijack:widget:$widget:$func() {
+    local origin="$(zle -lL $widget | cut -f4- -d' ')"
+
+    eval "$name() {
         $func ${@} \"$id\" \"\$@\"
 
         if [[ \"$origin\" ]]; then
-            zle \"$origin\" -- \"\$@i\"
+            if [[ "\$\{widgets\[\$origin\]\}" ]]; then
+                zle \"$origin\" -- \"\$@\"
+            else
+                $origin \"\$@\"
+            fi
         fi
     }"
 
-    zle -N "::hijack:widget:$widget:$func"
-    zle -N "$widget" "::hijack:widget:$widget:$func"
+    zle -N "$name"
+    zle -N "$widget" "$name"
+
 }
 
-:hijack:bind-widget zle-line-finish :hijack:hook
+:hijack:bind-widget ":hijack:finish" zle-line-finish :hijack:hook
 

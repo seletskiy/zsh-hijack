@@ -67,7 +67,7 @@ hijack:reset() {
 }
 
 :hijack:hook() {
-    print -S "${BUFFER//\\/\\\\}"
+    print -S -- "${BUFFER//\\/\\\\}"
 
     _hijack_skip_history_first=false
 

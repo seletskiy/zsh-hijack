@@ -32,6 +32,8 @@ hijack:reset() {
     local MATCH MBEGIN MEND
     local match mbegin mend
 
+    local i
+
     for (( i = 1; i < ${#_hijack_transformations}; i += 2 )); do
         condition=${_hijack_transformations[$i]}
         transformation=${_hijack_transformations[$i + 1]}

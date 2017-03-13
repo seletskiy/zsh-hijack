@@ -69,6 +69,8 @@ hijack:reset() {
 }
 
 :hijack:hook() {
+    local origin=$BUFFER
+
     print -S -- "${BUFFER//\\/\\\\}"
 
     _hijack_skip_history_first=false
@@ -78,7 +80,9 @@ hijack:reset() {
              _zsh_highlight
         fi
 
-        _hijack_skip_history_first=true
+        if [[ "$origin" != "$BUFFER" ]]; then
+            _hijack_skip_history_first=true
+        fi
     fi
 }
 

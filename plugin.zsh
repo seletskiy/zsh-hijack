@@ -4,7 +4,7 @@ _hijack_skip_history_first=false
 _hijack_transformations=()
 
 hijack:transform() {
-    zparseopts -a opts -D '-e=is_expression'
+    zparseopts -a opts -D 'e=is_expression'
 
     local condition=$1
     local transformation=$2
@@ -68,22 +68,29 @@ hijack:reset() {
     return "$result"
 }
 
+:hijack:get-history-line() {
+    printf "%s" "$1"
+}
+
 :hijack:hook() {
     local origin=$BUFFER
+    local line=$(:hijack:get-history-line "$BUFFER")
 
-    print -S -- "${BUFFER//\\/\\\\}"
+    print -S -- "${line//\\/\\\\}"
 
     _hijack_skip_history_first=false
 
     if BUFFER="$(:hijack:apply "$BUFFER")"; then
         if type _zsh_highlight >/dev/null; then
-             _zsh_highlight
+            _zsh_highlight
         fi
 
         if [[ "$origin" != "$BUFFER" ]]; then
             _hijack_skip_history_first=true
         fi
     fi
+
+    zle -R
 }
 
 zle -N hijack:history-substring-search-up
@@ -105,11 +112,7 @@ add-zsh-hook zshaddhistory :hijack:on-history-add
     return 1
 }
 
-_zsh_highlight_hijack_highlighter_predicate() {
-    _zsh_highlight_buffer_modified
-}
-
-_zsh_highlight_hijack_highlighter() {
+:hijack:highlight() {
     local offsets=()
     local offset
     local highlighting
@@ -117,7 +120,7 @@ _zsh_highlight_hijack_highlighter() {
     zstyle -g highlighting 'hijack:highlighting'
 
     if :hijack:apply "$BUFFER" > /dev/null; then
-        region_highlight+=("0 ${#BUFFER} ${highlighting}")
+        _zsh_highlight_apply_zle_highlight hijack ${highlighting} "0" "${#BUFFER}"
     fi
 }
 
@@ -153,4 +156,3 @@ _zsh_highlight_hijack_highlighter() {
 }
 
 :hijack:bind-widget ":hijack:finish" zle-line-finish :hijack:hook
-

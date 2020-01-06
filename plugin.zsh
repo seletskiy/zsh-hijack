@@ -1,4 +1,4 @@
-zstyle 'hijack:highlighting' 'fg=4'
+zstyle 'hijack:highlighting' style'fg=4'
 
 _hijack_skip_history_first=false
 _hijack_transformations=()
@@ -117,10 +117,14 @@ add-zsh-hook zshaddhistory :hijack:on-history-add
     local offset
     local highlighting
 
-    zstyle -g highlighting 'hijack:highlighting'
+    zstyle -g highlighting 'hijack:highlighting' style
 
     if :hijack:apply "$BUFFER" > /dev/null; then
+        hijack:_zsh_highlight
         _zsh_highlight_apply_zle_highlight hijack ${highlighting} "0" "${#BUFFER}"
+        return 0
+    else
+        return 1
     fi
 }
 

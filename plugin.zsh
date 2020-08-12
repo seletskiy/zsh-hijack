@@ -96,7 +96,6 @@ hijack:reset() {
 zle -N hijack:history-substring-search-up
 
 hijack:history-substring-search-up() {
-    zle kill-word
     zle history-substring-search-up
 
     if $_hijack_skip_history_first; then
